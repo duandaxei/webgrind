@@ -13,7 +13,7 @@ if (PHP_SAPI == 'cli-server') {
 
 class Webgrind_MasterConfig
 {
-    static $webgrindVersion = '1.8';
+    static $webgrindVersion = '1.9';
 }
 
 require './config.php';
@@ -186,6 +186,34 @@ try {
                 header('Content-type: application/json');
                 echo $response;
             }
+        break;
+
+        case 'download_link':
+            $file = Webgrind_Config::exposeServerFile(Webgrind_Config::xdebugOutputDir().get('file'));
+
+            if (empty($file)) {
+                sendJson(array('error' => 'No file found or access denied!'));
+                exit;
+            }
+
+            $params = array('op' => 'download_file', 'file' => get('file'));
+            sendJson(array('done' => '?'.http_build_query($params)));
+        break;
+
+        case 'download_file':
+            $file = Webgrind_Config::exposeServerFile(Webgrind_Config::xdebugOutputDir().get('file'));
+
+            if (empty($file)) {
+                exit;
+            }
+
+            header('Cache-Control: public');
+            header('Content-Description: File Transfer');
+            header('Content-Disposition: attachment; filename='.get('file'));
+            header('Content-Type: text/plain');
+            header('Content-Transfer-Encoding: binary');
+
+            readfile($file);
         break;
 
         case 'clear_files':

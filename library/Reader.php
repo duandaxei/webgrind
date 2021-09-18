@@ -235,12 +235,20 @@ class Webgrind_Reader
             return number_format($result, 2, '.', '');
         }
 
+        // Check for 10-nanosecond resolution (Xdebug 3).
+        // TODO: Time should be scaled in the preprocessor to avoid integer overflow.
+        // https://github.com/jokkedk/webgrind/pull/141#issuecomment-852623996
+        $events = $this->getHeader('events');
+        if (stripos($events, 'Time_(10ns)') !== false) {
+            $cost /= 100;
+        }
+
         if ($format == 'msec') {
             return round($cost/1000, 0);
         }
 
         // Default usec
-        return $cost;
+        return round($cost);
     }
 
     private function read($numbers=1) {
