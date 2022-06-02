@@ -275,7 +275,7 @@
 			$.getJSON("index.php",
 				{'op':'version_info'},
 				function(data) {
-					if (data.latest_version><?php echo Webgrind_Config::$webgrindVersion?>) {
+					if (isNewer('<?php echo Webgrind_Config::$webgrindVersion?>', data.latest_version)) {
 						$("#version_info").append('Version '+data.latest_version+' is available for <a href="'+data.download_url+'">download</a>.');
 					} else {
 						$("#version_info").append('You have the latest version.');
@@ -283,6 +283,21 @@
 
 				}
 			);
+		}
+
+		function parseVersion(version) {
+			return (version + '.0.0' ).split('.').slice(0, 3).map(x => parseInt(x, 10));
+		}
+
+		function isNewer(oldV, newV) {
+			var oldP = parseVersion(oldV);
+			var newP = parseVersion(newV);
+			for (var i = 0; i < 3; ++i) {
+				if (newP[i] !== oldP[i]) {
+					return newP[i] > oldP[i];
+				}
+			}
+			return false;
 		}
 
 		function clearFiles() {
